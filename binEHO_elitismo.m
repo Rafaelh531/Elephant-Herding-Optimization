@@ -48,9 +48,9 @@ custo=[825594 1677009 1676628 1523970 943972 97426 69666 1296457 1679693 1902996
 
 
 %% Parâmetros
-n_cla = 5; % Número de clãs (grupos de soluções)
-n_individuos = 100; % Número de indivíduos em cada clã
-max_geracoes = 200; % Número máximo de gerações
+n_cla = 2; % Número de clãs (grupos de soluções)
+n_individuos = 200; % Número de indivíduos em cada clã
+max_geracoes = 500; % Número máximo de gerações
 DR = 0.4;
 
 
@@ -131,12 +131,11 @@ while t < max_geracoes
 
         % Substitui as piores soluções do clã
         pior = find(aptidao(i, :) == min(aptidao(i, :)));
-        pior = pior(1);
         if length(pior) == n_individuos
             pior = ceil(0.75 * n_individuos):n_individuos;
         end
 
-        Y((i-1)*n_individuos+pior, :) = elite;
+        Y((i-1)*n_individuos+pior, :) = randi([0, 1], length(pior), 24);
         % Ajusta as novas soluções geradas
         for k = 1:length(pior)
 
@@ -156,6 +155,11 @@ while t < max_geracoes
             % Atualiza a aptidão da solução ajustada
             aptidao(i, pior(k)) = valor_solucao(i, pior(k));
         end
+
+        %elitismo
+        pior = find(aptidao(i, :) == min(aptidao(i, :)));
+        pior = pior(1);
+        Y((i-1)*n_individuos+pior, :) = elite;
 
         % Atualiza a matriarca se houver uma nova melhor solução no clã
         if max(aptidao(i, :)) > fitness_matriarca(i)
