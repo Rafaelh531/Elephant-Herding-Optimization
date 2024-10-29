@@ -50,16 +50,12 @@ custo=[825594 1677009 1676628 1523970 943972 97426 69666 1296457 1679693 1902996
 %% Parâmetros
 n_cla = 1; % Número de clãs (grupos de soluções)
 n_individuos = 1000; % Número de indivíduos em cada clã
-alpha = 0.5; % Parâmetro de ajuste para a atualização das posições
-beta = 0.5;  % Parâmetro de ajuste para a atualização das posições
 max_geracoes = 500; % Número máximo de gerações
-
 DR = 0.4;
 
 
 %% Inicialização
 dim = size(peso, 2); % Dimensão do problema (número de itens)
-
 DCount = ceil(DR*dim);
 
 % Geração inicial aleatória de soluções (números entre 0 e 1)
@@ -93,7 +89,6 @@ for i = 1:n_cla % Itera sobre cada clã
     matriarca(i, :) = Y((i-1)*n_individuos + melhor(1), :); % Atualiza matriarca
     fitness_matriarca(i) = max(aptidao(i, :)); % Fitness da matriarca
 
-    %SHOW ATÉ AQUI TA BALA
 end
 
 %% Otimização
@@ -103,32 +98,16 @@ t = 0; % Contador de gerações
 while t < max_geracoes
     % Atualiza as posições dos elefantes em cada clã
     for i = 1:n_cla
-        % Calcula o centro do clã (média das posições)
-        %centro_cla = sum(X((i-1)*n_individuos+(1:n_individuos), :)) / n_individuos;
-
-        % Atualiza as posições dos elefantes em direção à matriarca
-        %X((i-1)*n_individuos+(1:n_individuos), :) = X((i-1)*n_individuos+(1:n_individuos), :) + alpha * (repmat(matriarca(i, :), n_individuos, 1) - X((i-1)*n_individuos+(1:n_individuos), :)) .* rand(n_individuos, dim);
-
-        % Ajusta a posição dos elefantes
         for j = 1:n_individuos
             if Y((i-1)*n_individuos+j, :) == round(matriarca(i, :)) %se for a matriarca
                 l = randi([1, dim]);
                 Y(j,l) = ~Y(j,l);
-                % Atualiza baseado no centro do clã
-                %        X((i-1)*n_individuos+j, :) = X((i-1)*n_individuos+j, :) + beta * centro_cla .* rand(1, dim);
             else % se nao for a matriarca
                 Dimensionpool =   randi([1, dim], 1, DCount);
                 for k = 1:length(Dimensionpool)
                     Y(j,Dimensionpool(k)) = matriarca(i,Dimensionpool(k));
                 end
             end
-            % Normaliza a posição dos elefantes
-            %    if min(X((i-1)*n_individuos+j, :)) < 0
-            %        X((i-1)*n_individuos+j, :) = (X((i-1)*n_individuos+j, :) - min(X((i-1)*n_individuos+j, :))) / (max(X((i-1)*n_individuos+j, :)) - min(X((i-1)*n_individuos+j, :)));
-            %    else
-            %        X((i-1)*n_individuos+j, :) = X((i-1)*n_individuos+j, :) / max(X((i-1)*n_individuos+j, :));
-            %    end
-            %    Y((i-1)*n_individuos+j, :) = round(X((i-1)*n_individuos+j, :)); % Arredonda as soluções
 
             % Recalcula o peso e o valor das soluções
             peso_solucao(i, j) = sum(Y((i-1)*n_individuos+j, :) .* peso);
@@ -147,24 +126,16 @@ while t < max_geracoes
             % Fitness é igual ao valor total da solução
             aptidao(i,j) = sum(Y((i-1)*n_individuos+j, :) .* custo);
         end
-            %SHOW ATÉ AQUI TA BALA
-            
+
         % Substitui as piores soluções do clã
         pior = find(aptidao(i, :) == min(aptidao(i, :)));
         if length(pior) == n_individuos
             pior = ceil(0.75 * n_individuos):n_individuos;
         end
-        %X((i-1)*n_individuos+pior, :) = repmat(min(X((i-1)*n_individuos+(1:n_individuos), :)),length(pior), 1) + repmat((max(X((i-1)*n_individuos+(1:n_individuos), :)) - min(X((i-1)*n_individuos+(1:n_individuos), :))) + 1,length(pior), 1) .* rand(length(pior), dim);
-        %novo = round(rand(n_cla * n_individuos));
+
         Y((i-1)*n_individuos+pior, :) = randi([0, 1], length(pior), 24);
         % Ajusta as novas soluções geradas
         for k = 1:length(pior)
-        %    if min(X((i-1)*n_individuos+pior(k), :)) < 0
-        %        X((i-1)*n_individuos+pior(k), :) = (X((i-1)*n_individuos+pior(k), :) - min(X((i-1)*n_individuos+pior(k), :))) / (max(X((i-1)*n_individuos+pior(k), :)) - min(X((i-1)*n_individuos+pior(k), :)));
-        %    else
-        %        X((i-1)*n_individuos+pior(k), :) = X((i-1)*n_individuos+pior(k), :) / max(X((i-1)*n_individuos+pior(k), :));
-        %    end
-        %    Y((i-1)*n_individuos+pior(k), :) = round(X((i-1)*n_individuos+pior(k), :)); % Arredonda as novas soluções
 
             % Recalcula o peso e o valor das soluções
             peso_solucao(i, pior(k)) = sum(Y((i-1)*n_individuos+pior(k), :) .* peso);
@@ -185,12 +156,10 @@ while t < max_geracoes
 
         % Atualiza a matriarca se houver uma nova melhor solução no clã
         if max(aptidao(i, :)) > fitness_matriarca(i)
-  melhor = find(aptidao(i, :) == max(aptidao(i, :)));
-    matriarca(i, :) = Y((i-1)*n_individuos + melhor(1), :); % Atualiza matriarca
-    fitness_matriarca(i) = max(aptidao(i, :)); % Fitness da matriarca
+            melhor = find(aptidao(i, :) == max(aptidao(i, :)));
+            matriarca(i, :) = Y((i-1)*n_individuos + melhor(1), :); % Atualiza matriarca
+            fitness_matriarca(i) = max(aptidao(i, :)); % Fitness da matriarca
 
-
-            
         end
     end
 
